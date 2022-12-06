@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.io.Source
 
 def findFirstMarker(str: String, markerSize: Int): Int = {
-  str.sliding(markerSize).toList.takeWhile(_.distinct.length != markerSize).length + markerSize
+  str.sliding(markerSize).takeWhile(_.distinct.length != markerSize).length + markerSize
 }
 
 @main
