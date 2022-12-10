@@ -6,17 +6,19 @@ import scala.io.Source
 case class Position(x: Int, y: Int)
 
 object Position:
-  def up(p: Position): Position = Position(p.x, p.y - 1)
+  def up(p: Position): Position = p.copy(y = p.y - 1)
 
-  def down(p: Position): Position = Position(p.x, p.y + 1)
+  def down(p: Position): Position = p.copy(y = p.y + 1)
 
-  def left(p: Position): Position = Position(p.x - 1, p.y)
+  def left(p: Position): Position = p.copy(x = p.x - 1)
 
-  def right(p: Position): Position = Position(p.x + 1, p.y)
+  def right(p: Position): Position = p.copy(x = p.x + 1)
 
   def allDirections(): List[Position => Position] = List(Position.up, Position.down, Position.left, Position.right)
 
-case class Trees(graph: Graph, width: Int, height: Int)
+case class Trees(graph: Graph, width: Int, height: Int):
+  def isOutside(position: Position): Boolean =
+    position.x < 0 || position.y < 0 || position.x > this.width || position.y > this.height
 
 type Graph = Map[Position, Int]
 type Step = Position => Position
@@ -31,7 +33,7 @@ def getVisibility(tuple: (Position, Int), trees: Trees): Boolean =
 @tailrec
 def isVisible(stepFn: Step, tree: Position, height: Int, trees: Trees): Boolean =
   val neighbor = stepFn(tree)
-  if isOutside(neighbor, trees) then true
+  if trees.isOutside(neighbor) then true
   else if trees.graph(neighbor) >= height then false
   else isVisible(stepFn, neighbor, height, trees)
 
@@ -42,13 +44,10 @@ def calculateScenicScore(tuple: (Position, Int), trees: Trees): Int =
   val (position, height) = tuple
   Position.allDirections().map(getScenicScore(_, position, height, trees)).product
 
-def isOutside(position: Position, trees: Trees) =
-  position.x < 0 || position.y < 0 || position.x > trees.width || position.y > trees.height
-
 @tailrec
 def getScenicScore(stepFn: Step, tree: Position, height: Int, trees: Trees, score: Int = 0): Int =
   val neighbor = stepFn(tree)
-  if isOutside(neighbor, trees) then score
+  if trees.isOutside(neighbor) then score
   else if trees.graph(neighbor) >= height then score + 1
   else getScenicScore(stepFn, neighbor, height, trees, score + 1)
 
